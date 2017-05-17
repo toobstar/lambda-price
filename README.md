@@ -1,19 +1,8 @@
-# node-lambda-template
+# Lambda Price
 
-![node-lambda-template](../master/node-lambda-template.png?raw=true)
+Prototype of node.js app to be run in AWS Lambda for querying EOD price service
 
-The bare minimum for a node.js app running on [Amazon Lambda](http://aws.amazon.com/lambda/).
-
-It uses [node-lambda](https://github.com/motdotla/node-lambda) under the hood to locally run and also deploy your node.js Amazon Lambda application.
-
-## Install
-
-Clone this repository.
-
-```
-cd /to/your/template/path
-npm install
-```
+Uses [node-lambda](https://github.com/motdotla/node-lambda) under the hood to locally run and also deploy your node.js Amazon Lambda application.
 
 ## Usage
 
