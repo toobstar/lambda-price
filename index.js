@@ -28,91 +28,90 @@ function processStock(stockEntry, cloudant) {
     var dbname = 'stock_'+ticker.toLowerCase();
     console.log('processStock', dbname);
 
-    var mydb = cloudant.db.use(dbname);
-    //console.log("mydb", mydb);
+    var db = cloudant.db.use(dbname);
 
-    mydb.list().then(function(data) {
+    db.list().then(function(data) {
         console.log("list", data);
-        processStockForDb(stockEntry, mydb);
+        processStockForDb(stockEntry, db);
     }).catch(function(err) {
         console.log('something went wrong - trying to create', err);
-        cloudant.db.create(dbname, function(err, data) {
-            console.log("Error:", err);
-            console.log("Data:", data);
-            mydb = cloudant.db.use(dbname);
-            //callback(err, data);
-            processStockForDb(stockEntry, mydb);
+
+        cloudant.db.create(dbname).then(function(data) {
+            console.log("create result", dbname, data);
+            db = cloudant.db.use(dbname);
+            processStockForDb(stockEntry, db);
+        }).catch(function(err) {
+            console.log('create db error ', dbname, err);
         });
     })
+
 }
 
 function processStockForDb(stockEntry, db) {
     console.log('processStockForDb', stockEntry);
-    var priceDate = stockEntry.date;
-    //var priceClose = stockEntry.close;
-    //var priceHigh = stockEntry.high;
-    //var priceLow = stockEntry.low;
-    //var priceSplit = stockEntry.split;
-    //var priceVolume = stockEntry.volume;
-    //console.log('priceDate', priceDate);
-    //console.log('priceClose', priceClose);
-    //console.log('priceHigh', priceHigh);
-    //console.log('priceLow', priceLow);
-    //console.log('priceSplit', priceSplit);
-    //console.log('priceVolume', priceVolume);
-
-    db.get(priceDate, { revs_info: true }, function(err, body) {
-        //console.log("check existing", err, body);
-        if (!err) {
-            console.log("value already existing");
-            showAll(db);
-        }
-        else {
-            insertPrice(stockEntry, db);
-        }
+    var pk = priceKey(stockEntry);
+    db.get(pk).then(function(data) {
+        console.log("value already existing");
+        completeForStock(stockEntry, db);
+    }).catch(function(err) {
+        insertPrice(stockEntry, db);
     });
 }
 
+function priceKey(stockEntry) {
+    return 'price_' + stockEntry.date;
+}
 function insertPrice(stockEntry, db) {
-    console.log("insertPrice", stockEntry);
-    var priceDate = stockEntry.date;
-    db.insert(stockEntry, priceDate, function(err, body, header) {
-        if (err) {
-            return console.log('insert error ', err.message);
-        }
-        console.log('you have inserted stockEntry.', body);
-        showAll(db);
+    var pk = priceKey(stockEntry);
+    console.log("insertPrice", pk, stockEntry);
+    db.insert(stockEntry, pk).then(function(data) {
+        console.log('you have inserted stockEntry.', data);
+        completeForStock(stockEntry, db);
+    }).catch(function(err) {
+        console.log('insert error ', err);
+        completeForStock(stockEntry, db);
+    });
+
+}
+
+function completeForStock(stockEntry, db) {
+    var pk = priceKey(stockEntry);
+    console.log('completeForStock', pk);
+    db.get(pk).then(function(data) {
+        console.log('validating', data);
+    }).catch(function(err) {
+        console.log('something went wrong', err);
     });
 }
 
-function showAll(db) {
-
-    console.log('fetch one');
-    db.get('2017-05-18', { revs_info: true }, function(err, body) {
-        console.log('fetch one', err, body);
-    });
-
-    console.log('showAll');
-    db.list(function(err, body) {
-        if (!err) {
-            //console.log('showAll body', body);
-            body.rows.forEach(function(doc) {
-                console.log('doc', doc);
-                console.log('val ', doc.value);
-
-                var p = doc.value;
-                for (var key in p) {
-                    if (p.hasOwnProperty(key)) {
-                        console.log(key + " -> " + p[key]);
-                    }
-                }
-            });
-        }
-        else {
-            return console.log('list error ', err);
-        }
-    });
-}
+//function showAll(db) {
+//
+//    console.log('fetch one');
+//    db.get('2017-05-18', { revs_info: true }, function(err, body) {
+//        console.log('fetch one', err, body);
+//    });
+//
+//    console.log('showAll');
+//    db.list(function(err, body) {
+//        if (!err) {
+//            //console.log('showAll body', body);
+//            body.rows.forEach(function(doc) {
+//                console.log('doc', doc);
+//                console.log('val ', doc.value);
+//
+//                var p = doc.value;
+//                for (var key in p) {
+//                    if (p.hasOwnProperty(key)) {
+//                        console.log(key + " -> " + p[key]);
+//                    }
+//                }
+//            });
+//        }
+//        else {
+//            return console.log('list error ', err);
+//        }
+//    });
+//}
 
 exports.handler = function (event, context, callback) {
     //console.log('Running index.handler');
