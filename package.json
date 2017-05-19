@@ -1,15 +1,15 @@
 {
   "name": "lambda-price",
   "version": "0.0.1",
-  "description": "The bare minimum for a node.js app running on Amazon Lambda. Uses node-lambda under the hood to locally run and also deploy your node.js Amazon Lambda application.",
+  "description": "Fetch prices from provided API then stored them in cloud based DB service",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/motdotla/node-lambda-template.git"
+    "url": "git://github.com/toobstar/lambda-price.git"
   },
   "author": "toby vidler",
   "license": "ISC",
-  "homepage": "https://github.com/motdotla/node-lambda-template",
+  "homepage": "https://github.com/toobstar/lambda-price",
   "scripts": {
     "setup": "./node_modules/.bin/node-lambda setup",
     "test": "./node_modules/.bin/node-lambda run",
