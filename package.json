@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "cloudant": "^1.7.1",
-    "dotenv": "^4.0.0"
+    "dotenv": "^4.0.0",
+    "price-service": "^0.3.0"
   }
 }
