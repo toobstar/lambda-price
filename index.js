@@ -3,15 +3,22 @@ require('dotenv').load();
 var Cloudant = require('cloudant');
 var PriceService = require('price-service');
 
-var username = process.env.cloudant_username;
-var password = process.env.cloudant_password;
-var priceUrl = process.env.priceUrl;
+var username =    process.env.cloudant_username;
+var password =    process.env.cloudant_password;
+var apiKey =      process.env.cloudant_api_key;
+var apiPassword = process.env.cloudant_api_password;
+var priceUrl =    process.env.priceUrl;
 
 function processResult(resJson, cloudant) {
 
     cloudant.db.list().then(function(existingDbs) {
         resJson.forEach(function(stockEntry) {
             var ticker = stockEntry.ticker;
+
+            if (ticker != 'BHP' && ticker != 'CBA') {
+                return; // limit tickers for now
+            }
+
             var dbname = 'stock_'+ticker.toLowerCase();
 
             if (existingDbs.indexOf(dbname) > -1) {
@@ -24,7 +31,18 @@ function processResult(resJson, cloudant) {
                 cloudant.db.create(dbname).then(function(data) {
                     console.log("create result", dbname, data);
                     db = cloudant.db.use(dbname);
-                    processStockForDb(stockEntry, db);
+                    var security = {
+                        nobody: ['_reader'],
+                        toobstar : [ '_reader' , '_writer', '_admin', '_replicator' ],
+                        apiKey : [ '_reader' , '_writer', '_admin', '_replicator' ]
+                    };
+                    db.set_security(security, function(er, result) {
+                        if (er) {
+                            throw er;
+                        }
+                        console.log("set_security result", result);
+                        processStockForDb(stockEntry, db);
+                    });
                 }).catch(function(err) {
                     console.log('create db error ', dbname, err);
                 });
@@ -76,6 +94,7 @@ exports.handler = function (event, context, callback) {
     console.log('config', username, password, priceUrl);
 
     var cloudant = Cloudant({account:username, password:password, plugin:'promises'});
+    //var cloudant = Cloudant({account:username, key:apiKey, password:apiPassword, plugin:'promises'});
     var priceService = PriceService();
 
     priceService.fetch(priceUrl, function(result) {
