@@ -68,15 +68,21 @@ function priceKey(stockEntry) {
 }
 function insertPrice(stockEntry, db) {
     var pk = priceKey(stockEntry);
-    console.log("insertPrice", pk, stockEntry);
-    db.insert(stockEntry, pk).then(function(data) {
+    var minData = {};
+    minData.date = stockEntry.date;
+    minData.close = stockEntry.close;
+    if (stockEntry.split && stockEntry.split.length  > 0) {
+        minData.split = stockEntry.split;
+    }
+
+    console.log("insertPrice", pk, minData);
+    db.insert(minData, pk).then(function(data) {
         console.log('you have inserted stockEntry.', data);
         completeForStock(stockEntry, db);
     }).catch(function(err) {
         console.log('insert error ', err);
         completeForStock(stockEntry, db);
     });
-
 }
 
 function completeForStock(stockEntry, db) {
