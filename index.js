@@ -15,7 +15,7 @@ function processResult(resJson, cloudant) {
         resJson.forEach(function(stockEntry) {
             var ticker = stockEntry.ticker;
 
-            if (ticker != 'BHP' && ticker != 'CBA') {
+            if (ticker != 'BHP' && ticker != 'CBA' && ticker != 'COH' && ticker != 'ANZ' && ticker != 'WBC') {
                 return; // limit tickers for now
             }
 
@@ -32,7 +32,8 @@ function processResult(resJson, cloudant) {
                     console.log("create result", dbname, data);
                     db = cloudant.db.use(dbname);
                     var security = {
-                        nobody: ['_reader'],
+                        nobody: [],
+                        hologratchartheshourster: ['_reader', '_replicator'],
                         toobstar : [ '_reader' , '_writer', '_admin', '_replicator' ],
                         apiKey : [ '_reader' , '_writer', '_admin', '_replicator' ]
                     };
