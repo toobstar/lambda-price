@@ -15,9 +15,9 @@ function processResult(resJson, cloudant) {
         resJson.forEach(function(stockEntry) {
             var ticker = stockEntry.ticker;
 
-            if (ticker != 'BHP' && ticker != 'CBA' && ticker != 'COH' && ticker != 'ANZ' && ticker != 'TCL') {
-                return; // limit tickers for now
-            }
+            //if (ticker != 'BHP' && ticker != 'CBA' && ticker != 'COH' && ticker != 'ANZ' && ticker != 'TCL') {
+            //    return; // limit tickers for now
+            //}
 
             var dbname = 'stock_'+ticker.toLowerCase();
 
