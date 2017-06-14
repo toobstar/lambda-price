@@ -15,7 +15,7 @@ function processResult(resJson, cloudant) {
         resJson.forEach(function(stockEntry) {
             var ticker = stockEntry.ticker;
 
-            if (ticker != 'BHP' && ticker != 'CBA' && ticker != 'COH' && ticker != 'ANZ' && ticker != 'WBC') {
+            if (ticker != 'BHP' && ticker != 'CBA' && ticker != 'COH' && ticker != 'ANZ' && ticker != 'TCL') {
                 return; // limit tickers for now
             }
 
@@ -69,7 +69,7 @@ function priceKey(stockEntry) {
 }
 function insertPrice(stockEntry, db) {
     var pk = priceKey(stockEntry);
-    var minData = {};
+    var minData = {}; // transform high/low/close JSON to minimal data needed
     minData.date = stockEntry.date;
     minData.close = stockEntry.close;
     if (stockEntry.split && stockEntry.split.length  > 0) {
@@ -114,4 +114,4 @@ exports.handler = function (event, context, callback) {
     // callback( 'some error type' );
 };
 
-exports.handler(); // just for local testing
+//exports.handler(); // just for local testing
