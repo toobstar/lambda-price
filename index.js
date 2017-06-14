@@ -11,6 +11,8 @@ var priceUrl =    process.env.priceUrl;
 
 function processResult(resJson, cloudant) {
 
+    var count = 0;
+
     cloudant.db.list().then(function(existingDbs) {
         resJson.forEach(function(stockEntry) {
             var ticker = stockEntry.ticker;
@@ -19,43 +21,55 @@ function processResult(resJson, cloudant) {
             //    return; // limit tickers for now
             //}
 
-            var dbname = 'stock_'+ticker.toLowerCase();
+            if (!ticker) {
+                console.log('missing ticker in input for ', stockEntry);
+                return;
+            }
+            count++;
+            setTimeout(function(){
+                processEntry(cloudant, ticker, existingDbs, stockEntry);
+            }, count * 100);
 
-            if (existingDbs.indexOf(dbname) > -1) {
-                console.log('dbname-existing', dbname);
-                var db = cloudant.db.use(dbname);
-                processStockForDb(stockEntry, db);
-            }
-            else {
-                console.log('dbname-creating', dbname);
-                cloudant.db.create(dbname).then(function(data) {
-                    console.log("create result", dbname, data);
-                    db = cloudant.db.use(dbname);
-                    var security = {
-                        nobody: [],
-                        hologratchartheshourster: ['_reader', '_replicator'],
-                        toobstar : [ '_reader' , '_writer', '_admin', '_replicator' ],
-                        apiKey : [ '_reader' , '_writer', '_admin', '_replicator' ]
-                    };
-                    db.set_security(security, function(er, result) {
-                        if (er) {
-                            throw er;
-                        }
-                        console.log("set_security result", result);
-                        processStockForDb(stockEntry, db);
-                    });
-                }).catch(function(err) {
-                    console.log('create db error ', dbname, err);
-                });
-            }
         });
     }).catch(function(err) {
         console.log('db list error ', err);
     });
 }
 
+function processEntry(cloudant, ticker, existingDbs, stockEntry) {
+    var dbname = 'stock_' + ticker.toLowerCase();
+
+    if (existingDbs.indexOf(dbname) > -1) {
+        console.log('dbname-existing', dbname);
+        var db = cloudant.db.use(dbname);
+        processStockForDb(stockEntry, db);
+    }
+    else {
+        console.log('dbname-creating', dbname);
+        cloudant.db.create(dbname).then(function (data) {
+            console.log("create result", dbname, data);
+            db = cloudant.db.use(dbname);
+            var security = {
+                nobody: [],
+                hologratchartheshourster: ['_reader', '_replicator'],
+                toobstar: ['_reader', '_writer', '_admin', '_replicator'],
+                apiKey: ['_reader', '_writer', '_admin', '_replicator']
+            };
+            db.set_security(security, function (er, result) {
+                if (er) {
+                    throw er;
+                }
+                console.log("set_security result", result);
+                processStockForDb(stockEntry, db);
+            });
+        }).catch(function (err) {
+            console.log('create db error ', dbname, err);
+        });
+    }
+}
+
 function processStockForDb(stockEntry, db) {
-    console.log('processStockForDb', stockEntry);
+    //console.log('processStockForDb', stockEntry);
     db.get(priceKey(stockEntry)).then(function(data) {
         console.log("value already existing");
         completeForStock(stockEntry, db);
@@ -78,7 +92,7 @@ function insertPrice(stockEntry, db) {
 
     console.log("insertPrice", pk, minData);
     db.insert(minData, pk).then(function(data) {
-        console.log('you have inserted stockEntry.', data);
+        //console.log('you have inserted stockEntry.', data);
         completeForStock(stockEntry, db);
     }).catch(function(err) {
         console.log('insert error ', err);
@@ -90,7 +104,7 @@ function completeForStock(stockEntry, db) {
     var pk = priceKey(stockEntry);
     console.log('completeForStock', pk);
     db.get(pk).then(function(data) {
-        console.log('validating', data);
+        //console.log('validating', data);
     }).catch(function(err) {
         console.log('something went wrong', err);
     });
