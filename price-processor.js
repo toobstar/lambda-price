@@ -42,9 +42,9 @@ function processResult(resJson, cloudant) {
             var ticker = stockEntry.ticker;
 
             //if (ticker != 'BHP' && ticker != 'CBA' && ticker != 'COH' && ticker != 'ANZ' && ticker != 'TCL') {
-            if (ticker != 'CBA') {
-                return; // limit tickers for now
-            }
+            //if (ticker != 'CBA') {
+            //    return; // limit tickers for now
+            //}
 
             if (!ticker) {
                 console.log('missing ticker in input for ', resJson);
@@ -153,7 +153,7 @@ function processStockForDb(updatedPriceArray, db) {
 }
 
 function dataKey() {
-    return 'marketData';
+    return 'priceData';
 }
 function insertPrice(stockEntry, db) {
     var pk = dataKey();
